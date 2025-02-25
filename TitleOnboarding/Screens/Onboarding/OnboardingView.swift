@@ -11,6 +11,7 @@ import SwiftUI
 struct OnboardingView: View {
     @State private var currentPage = 0
     @State private var offset: CGFloat = 0
+    @EnvironmentObject var router: Router
     
     let onboardingData: [OnboardingItem] = [
         OnboardingItem(
@@ -66,16 +67,10 @@ struct OnboardingView: View {
             }
             .padding(.bottom, 24)
             
-            Button(action: {
-                print("Get Started tapped!")
-            }) {
-                Text("Get Started")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.black)
+            MainButton(style: .black, text: "CONTINUE") {
+                router.navigate(to: .stylistsFocusView)
             }
+            .padding(.bottom)
             .padding(.horizontal, 20)
             
             HStack {
@@ -87,6 +82,7 @@ struct OnboardingView: View {
             }
             .padding(.horizontal, 16)
         }
+        .navigationBarHidden(true)
     }
 }
 

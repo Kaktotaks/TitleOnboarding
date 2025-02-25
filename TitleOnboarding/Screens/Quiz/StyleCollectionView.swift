@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct StyleCollectionView: View {
-    let title: String = "Which style best represents you?"
+    @EnvironmentObject var router: Router
     
     let models: [ColorStyleModel] = [
         ColorStyleModel(imageName: "casualModel", title: "CASUAL"),
@@ -28,7 +28,7 @@ struct StyleCollectionView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text(title)
+            Text("Which style best represents you?")
                 .customTextStyle(textStyle: .headtitleOnboarding)
                 .padding(16)
             
@@ -58,12 +58,18 @@ struct StyleCollectionView: View {
             .scrollIndicators(.hidden)
             
             MainButton(style: .black , text: "Continue") {
+                router.navigate(to: .colorsCollectionView)
                 pickedItems.map { item in
                     print(item)
                 }
             }
             .padding([.leading, .trailing, .bottom])
         }
+        .setupBackButton() {
+            router.navigateBack()
+        }
+        .navigationTitle("Style preferences")
+        .navigationBarTitleDisplayMode(.inline)
         .frame(alignment: .leading)
     }
 }

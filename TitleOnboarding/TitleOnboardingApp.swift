@@ -9,9 +9,17 @@ import SwiftUI
 
 @main
 struct TitleOnboardingApp: App {
+    @StateObject var router = Router()
+    
     var body: some Scene {
         WindowGroup {
-            PaywallView()
+            NavigationStack(path: $router.navPath) {
+                WelcomeView()
+                    .navigationDestination(for: Router.Destination.self) { destination in
+                        router.view(for: destination)
+                    }
+            }
+            .environmentObject(router)
         }
     }
 }

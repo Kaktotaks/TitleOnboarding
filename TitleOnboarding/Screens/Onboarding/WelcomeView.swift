@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct WelcomeView: View {
+    @EnvironmentObject var router: Router
+    
     var body: some View {
         VStack {
             VStack {
@@ -25,7 +27,7 @@ struct WelcomeView: View {
                 }
                 
                 MainButton(style: .white, text: "CONTINUE") {
-                    print("Get Started tapped!")
+                    router.navigate(to: .onboardingView)
                 }
                 .padding([.bottom])
             }

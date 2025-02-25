@@ -8,8 +8,7 @@
 import SwiftUI
 
 struct StylistsFocusView: View {
-    let title: String = "What’d you like our stylists to focus on?"
-    let subTitle: String = "We offer services via live-chat mode."
+    @EnvironmentObject var router: Router
     
     let models: [FocusModel] = [
         FocusModel(mainTitle: "Reinvent wardrobe", subTitle: "to discover fresh outfit ideas"),
@@ -24,9 +23,9 @@ struct StylistsFocusView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 8) {
-                Text(title)
+                Text("What’d you like our stylists to focus on?")
                     .customTextStyle(textStyle: .headtitleQuize)
-                Text(subTitle)
+                Text("We offer services via live-chat mode.")
                     .customTextStyle(textStyle: .subheadline)
             }
             .padding(18)
@@ -57,10 +56,14 @@ struct StylistsFocusView: View {
                 pickedItems.map { item in
                     print(item)
                 }
+                router.navigate(to: .styleCollectionView)
             }
             .padding([.leading, .trailing, .bottom], 20)
         }
         .frame(alignment: .leading)
+        .navigationTitle("Lifestyle & Interests")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden()
     }
 }
 

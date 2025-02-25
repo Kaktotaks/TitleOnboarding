@@ -9,7 +9,7 @@
 import SwiftUI
 
 struct ColorsCollectionView: View {
-    let title: String = "Choose favourite colors"
+    @EnvironmentObject var router: Router
     
     let models: [ColorStyleModel] = [
         ColorStyleModel(imageName: "LightBlueColor", title: "Light blue"),
@@ -36,7 +36,7 @@ struct ColorsCollectionView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text(title)
+            Text("Choose favourite colors")
                 .customTextStyle(textStyle: .headtitleOnboarding)
                 .padding(16)
             
@@ -66,12 +66,19 @@ struct ColorsCollectionView: View {
             .scrollIndicators(.hidden)
             
             MainButton(style: .black , text: "Continue") {
+                router.navigate(to: .paywallView)
+                
                 pickedItems.map { item in
                     print(item)
                 }
             }
             .padding([.leading, .trailing, .bottom])
         }
+        .setupBackButton() {
+            router.navigateBack()
+        }
+        .navigationTitle("Style preferences")
+        .navigationBarTitleDisplayMode(.inline)
         .frame(alignment: .leading)
     }
 }

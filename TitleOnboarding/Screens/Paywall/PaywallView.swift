@@ -9,6 +9,7 @@ import SwiftUI
 
 struct PaywallView: View {
     @State private var selectedModel: PlanModel?
+    @EnvironmentObject var router: Router
     
     let models: [PlanModel] = [
         .init(period: "TRY 3 DAYS", price: "FOR FREE", description: "then $29.99 billed monthly", isHot: true),
@@ -39,7 +40,7 @@ struct PaywallView: View {
                     
                     PlansViewView(selectedModel: $selectedModel, models: models)
                         .padding()
-                        .frame(height: 190)
+                        .frame(height: 170)
                     
                     Text("Auto-renewable. Cancel anytime.")
                         .customTextStyle(textStyle: .secondary(size: 14))
@@ -48,6 +49,9 @@ struct PaywallView: View {
                     BottomView(pickedPlan: $selectedModel)
                 }
             }
+        }
+        .setupBackButton() {
+            router.navigateBack()
         }
         .edgesIgnoringSafeArea(.all)
         .scrollIndicators(.hidden)
