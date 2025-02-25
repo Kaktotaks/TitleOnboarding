@@ -9,7 +9,8 @@ import SwiftUI
 
 struct PaywallView: View {
     @State private var selectedModel: PlanModel?
-    @EnvironmentObject var router: Router
+//    @EnvironmentObject var router: Router
+    @Binding var isPresented: Bool
     
     let models: [PlanModel] = [
         .init(period: "TRY 3 DAYS", price: "FOR FREE", description: "then $29.99 billed monthly", isHot: true),
@@ -17,8 +18,9 @@ struct PaywallView: View {
         .init(period: "Lifetime", price: "$99.99", description: "one-time payment")
     ]
     
-    init() {
+    init(isPresented: Binding<Bool>) {
         _selectedModel = State(initialValue: models.first { $0.isHot })
+        _isPresented = isPresented
     }
     
     var body: some View {
@@ -51,7 +53,7 @@ struct PaywallView: View {
             }
         }
         .setupBackButton() {
-            router.navigateBack()
+            isPresented = false
         }
         .edgesIgnoringSafeArea(.all)
         .scrollIndicators(.hidden)
@@ -60,7 +62,7 @@ struct PaywallView: View {
 
 struct PaywallView_Previews: PreviewProvider {
     static var previews: some View {
-        PaywallView()
+        PaywallView(isPresented: .constant(true))
     }
 }
 

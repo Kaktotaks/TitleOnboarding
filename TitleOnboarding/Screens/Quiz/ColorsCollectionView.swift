@@ -10,6 +10,7 @@ import SwiftUI
 
 struct ColorsCollectionView: View {
     @EnvironmentObject var router: Router
+    @State var paywallPresented: Bool = false
     
     let models: [ColorStyleModel] = [
         ColorStyleModel(imageName: "LightBlueColor", title: "Light blue"),
@@ -35,51 +36,61 @@ struct ColorsCollectionView: View {
     @State private var pickedItems: Set<ColorStyleModel> = []
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Choose favourite colors")
-                .customTextStyle(textStyle: .headtitleOnboarding)
-                .padding(16)
-            
-            ScrollView {
-                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
-                    ForEach(models) { model in
-                        CollectionCell(
-                            type: .color,
-                            model: model,
-                            isPicked: Binding(
-                                get: { pickedItems.contains(model) },
-                                set: { isPicked in
-                                    if isPicked {
-                                        pickedItems.insert(model)
-                                    } else {
-                                        pickedItems.remove(model)
-                                    }
-                                }
-                            )
-                        )
-                        .frame(width: (UIScreen.main.bounds.width / 3) - 24, height: (UIScreen.main.bounds.width / 3) - 24)
+        ZStack {
+            if paywallPresented {
+                PaywallView(isPresented: $paywallPresented)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .zIndex(1)
+            } else {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Choose favourite colors")
+                        .customTextStyle(textStyle: .headtitleOnboarding)
+                        .padding(16)
+                    
+                    ScrollView {
+                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
+                            ForEach(models) { model in
+                                CollectionCell(
+                                    type: .color,
+                                    model: model,
+                                    isPicked: Binding(
+                                        get: { pickedItems.contains(model) },
+                                        set: { isPicked in
+                                            if isPicked {
+                                                pickedItems.insert(model)
+                                            } else {
+                                                pickedItems.remove(model)
+                                            }
+                                        }
+                                    )
+                                )
+                                .frame(width: (UIScreen.main.bounds.width / 3) - 24, height: (UIScreen.main.bounds.width / 3) - 24)
+                            }
+                        }
+                        .padding(.horizontal, 10)
                     }
+                    .bottomFade()
+                    .scrollIndicators(.hidden)
+                    
+                    MainButton(style: .black , text: "Continue") {
+                        withAnimation(.bouncy) {
+                            paywallPresented.toggle()
+                        }
+                        pickedItems.map { item in
+                            print(item)
+                        }
+                    }
+                    .padding([.leading, .trailing, .bottom])
                 }
-                .padding(.horizontal, 10)
-            }
-            .bottomFade()
-            .scrollIndicators(.hidden)
-            
-            MainButton(style: .black , text: "Continue") {
-                router.navigate(to: .paywallView)
+                .setupBackButton() {
+                    router.navigateBack()
+                }
+                .navigationTitle("Style preferences")
+                .navigationBarTitleDisplayMode(.inline)
+                .frame(alignment: .leading)
                 
-                pickedItems.map { item in
-                    print(item)
-                }
             }
-            .padding([.leading, .trailing, .bottom])
         }
-        .setupBackButton() {
-            router.navigateBack()
-        }
-        .navigationTitle("Style preferences")
-        .navigationBarTitleDisplayMode(.inline)
-        .frame(alignment: .leading)
     }
 }
 

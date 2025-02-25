@@ -35,7 +35,7 @@ final class Router: NSObject, ObservableObject {
         case .onboardingView:
             OnboardingView()
         case .paywallView:
-            PaywallView()
+            PaywallView(isPresented: .constant(false))
         }
     }
     
