@@ -9,7 +9,6 @@ import SwiftUI
 
 struct PaywallView: View {
     @State private var selectedModel: PlanModel?
-//    @EnvironmentObject var router: Router
     @Binding var isPresented: Bool
     
     let models: [PlanModel] = [
@@ -53,7 +52,9 @@ struct PaywallView: View {
             }
         }
         .setupBackButton() {
-            isPresented = false
+            withAnimation(.bouncy) {
+                isPresented = false
+            }
         }
         .edgesIgnoringSafeArea(.all)
         .scrollIndicators(.hidden)
