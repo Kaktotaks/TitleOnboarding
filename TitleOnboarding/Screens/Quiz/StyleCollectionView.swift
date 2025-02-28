@@ -6,76 +6,118 @@
 //
 
 import SwiftUI
+import ComposableArchitecture
+
+@Reducer
+struct StyleCollectionStore {
+    @Dependency(\.apiClient) var apiClient
+    
+    struct State: Equatable {
+        var models: [ColorStyleModel] = []
+        var pickedItems: Set<ColorStyleModel> = []
+        var isLoading: Bool = false
+    }
+    
+    
+    enum Action: Equatable {
+        case toggleItem(ColorStyleModel)
+        case navigateToColorsCollection
+        case loadModels
+        case modelsLoaded([ColorStyleModel])
+        case navigateBack
+    }
+    
+    var body: some Reducer<State, Action> {
+        Reduce { state, action in
+            switch action {
+            case .toggleItem(let model):
+                if state.pickedItems.contains(model) {
+                    state.pickedItems.remove(model)
+                } else {
+                    state.pickedItems.insert(model)
+                }
+                return .none
+                
+            case .navigateToColorsCollection:
+                return .none
+                
+            case .navigateBack:
+                return .none
+                
+            case .loadModels:
+                state.isLoading = true
+                return .run { send in
+                    let models = await apiClient.fetchStylesModels()
+                    await send(.modelsLoaded(models))
+                }
+                
+            case .modelsLoaded(let models):
+                state.isLoading = false
+                state.models = models
+                return .none
+            }
+        }
+    }
+}
 
 struct StyleCollectionView: View {
     @EnvironmentObject var router: Router
-    
-    let models: [ColorStyleModel] = [
-        ColorStyleModel(imageName: "casualModel", title: "CASUAL"),
-        ColorStyleModel(imageName: "bohoModel", title: "BOHO"),
-        ColorStyleModel(imageName: "classyModel", title: "CLASSY"),
-        ColorStyleModel(imageName: "ladylikeModel", title: "LADYLIKE"),
-        ColorStyleModel(imageName: "urbanModel", title: "URBAN"),
-        ColorStyleModel(imageName: "sportyModel", title: "SPORTY"),
-        ColorStyleModel(imageName: "creativeModel", title: "CREATIVE"),
-        ColorStyleModel(imageName: "funkyRockModel", title: "FUNKY ROCK"),
-        ColorStyleModel(imageName: "preppyModel", title: "PREPPY"),
-        ColorStyleModel(imageName: "sexyModel", title: "SEXY"),
-        ColorStyleModel(imageName: "unspecifiedModel", title: "don’t know")
-    ]
-    
-    @State private var pickedItems: Set<ColorStyleModel> = []
+    let store: StoreOf<StyleCollectionStore>
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Which style best represents you?")
-                .customTextStyle(textStyle: .headtitleOnboarding)
-                .padding(16)
-            
-            ScrollView {
-                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
-                    ForEach(models) { model in
-                        CollectionCell(
-                            type: .image,
-                            model: model,
-                            isPicked: Binding(
-                                get: { pickedItems.contains(model) },
-                                set: { isPicked in
-                                    if isPicked {
-                                        pickedItems.insert(model)
-                                    } else {
-                                        pickedItems.remove(model)
+        WithViewStore(self.store, observe: { $0 }) { viewStore in
+            VStack(alignment: .leading, spacing: 16) {
+                Text("Which style best represents you?")
+                    .customTextStyle(textStyle: .headtitleOnboarding)
+                    .padding(16)
+                
+                ScrollView {
+                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
+                        ForEach(viewStore.models) { model in
+                            CollectionCell(
+                                type: .image,
+                                model: model,
+                                isPicked: Binding(
+                                    get: { viewStore.pickedItems.contains(model) },
+                                    set: { isPicked in
+                                        viewStore.send(.toggleItem(model))
                                     }
-                                }
+                                )
                             )
-                        )
-                        .frame(width: (UIScreen.main.bounds.width / 2) - 24, height: (UIScreen.main.bounds.width / 2) - 24)
+                            .frame(width: (UIScreen.main.bounds.width / 2) - 24, height: (UIScreen.main.bounds.width / 2) - 24)
+                        }
+                    }
+                    .padding(.horizontal, 14)
+                }
+                .loadingOverlay(isLoading: viewStore.isLoading)
+                .bottomFade()
+                .scrollIndicators(.hidden)
+                
+                MainButton(style: .black , text: "Continue") {
+                    //                    viewStore.send(.navigateToColorsCollection)
+                    router.navigate(to: .colorsCollectionView)
+                    viewStore.pickedItems.forEach { item in
+                        print(item)
                     }
                 }
-                .padding(.horizontal, 14)
+                .padding([.leading, .trailing, .bottom])
             }
-            .bottomFade()
-            .scrollIndicators(.hidden)
-            
-            MainButton(style: .black , text: "Continue") {
-                router.navigate(to: .colorsCollectionView)
-                pickedItems.map { item in
-                    print(item)
-                }
+            .setupBackButton() {
+                //                viewStore.send(.navigateBack)
+                router.navigateBack()
             }
-            .padding([.leading, .trailing, .bottom])
+            .onAppear {
+                viewStore.send(.loadModels)
+            }
+            .navigationTitle("Style preferences")
+            .navigationBarTitleDisplayMode(.inline)
+            .frame(alignment: .leading)
         }
-        .setupBackButton() {
-            router.navigateBack()
-        }
-        .navigationTitle("Style preferences")
-        .navigationBarTitleDisplayMode(.inline)
-        .frame(alignment: .leading)
     }
 }
 
 struct Style_CollectionView: PreviewProvider {
     static var previews: some View {
-        StyleCollectionView()
+        StyleCollectionView(store: Store(initialState: StyleCollectionStore.State(), reducer: { StyleCollectionStore() } ))
     }
 }

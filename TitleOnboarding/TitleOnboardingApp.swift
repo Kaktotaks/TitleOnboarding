@@ -6,18 +6,24 @@
 //
 
 import SwiftUI
+import ComposableArchitecture
 
 @main
 struct TitleOnboardingApp: App {
     @StateObject var router = Router()
     
+    let store = Store(
+        initialState: WelcomeDomain.State(),
+        reducer: { WelcomeDomain()}
+    )
+    
     var body: some Scene {
         WindowGroup {
             NavigationStack(path: $router.navPath) {
-                WelcomeView()
+                WelcomeView(store: store)
                     .navigationDestination(for: Router.Destination.self) { destination in
-                        router.view(for: destination)
-                    }
+                    router.view(for: destination)
+                }
             }
             .environmentObject(router)
         }

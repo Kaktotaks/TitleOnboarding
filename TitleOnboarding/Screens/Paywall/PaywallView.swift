@@ -95,7 +95,11 @@ fileprivate struct PlansViewView: View {
             HStack(alignment: .bottom, spacing: 16) {
                 ForEach(models) { model in
                     PlanCell(
-                        isSelected: selectedModel == model,
+                        isSelected: Binding(get: {
+                            selectedModel == model
+                        }, set: { _ in
+                            selectedModel = model
+                        }),
                         period: model.period,
                         price: model.price,
                         description: model.description,

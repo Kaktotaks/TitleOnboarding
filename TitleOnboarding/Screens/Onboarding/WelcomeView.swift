@@ -6,45 +6,49 @@
 //
 
 import SwiftUI
+import ComposableArchitecture
 
 struct WelcomeView: View {
     @EnvironmentObject var router: Router
+    let store: StoreOf<WelcomeDomain>
     
     var body: some View {
-        VStack {
+        WithViewStore(self.store, observe: { $0 }) { viewStore in
             VStack {
-                Spacer()
-                
-                HStack() {
-                    Text("""
+                VStack {
+                    Spacer()
+                    
+                    HStack() {
+                        Text("""
                              Online Personal
                              Styling.
                              Outfits for
                              Every Woman.
                              """)
-                    .customTextStyle(textStyle: .welcomeTitle)
-                    Spacer()
+                        .customTextStyle(textStyle: .welcomeTitle)
+                        Spacer()
+                    }
+                    
+                    MainButton(style: .white, text: "CONTINUE") {
+                        router.navigate(to: .onboardingView)
+                    }
+                    .padding([.bottom])
                 }
-                
-                MainButton(style: .white, text: "CONTINUE") {
-                    router.navigate(to: .onboardingView)
-                }
-                .padding([.bottom])
+                .padding(.horizontal, 20)
             }
-            .padding(.horizontal, 20)
+            .background(
+                Image(.welcome)
+                    .resizable()
+                    .scaledToFill()
+                    .edgesIgnoringSafeArea(.all)
+                    .bottomFade(height: 600, startColor: .black)
+            )
         }
-        .background(
-            Image(.welcome)
-                .resizable()
-                .scaledToFill()
-                .edgesIgnoringSafeArea(.all)
-                .bottomFade(height: 600, startColor: .black)
-        )
     }
 }
 
 struct WelcomeView_Previews: PreviewProvider {
     static var previews: some View {
-        WelcomeView()
+        WelcomeView(store: Store(initialState: WelcomeDomain.State(), reducer: { WelcomeDomain() } ))
     }
 }

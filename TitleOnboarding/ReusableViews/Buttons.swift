@@ -36,8 +36,9 @@ struct CheckmarkButton: View {
     
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: isPicked ? "checkmark.square.fill" : "")
+            Image(isPicked ? "checkBox" : "")
                 .resizable()
+                .scaledToFit()
                 .frame(width: 20, height: 20)
                 .overlay {
                     Rectangle()

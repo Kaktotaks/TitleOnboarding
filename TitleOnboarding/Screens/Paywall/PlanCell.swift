@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct PlanCell: View {
-    var isSelected: Bool
+    @Binding var isSelected: Bool
     let period: String
     let price: String
     let description: String
@@ -32,6 +32,7 @@ struct PlanCell: View {
                     Text(description)
                         .customTextStyle(textStyle: .secondary(size: 12))
                 }
+                .scaleEffect(isSelected ? 0.95 : 1.0)
                 .padding(isHot ? 8 : 14)
                 
                 if isHot {
