@@ -33,7 +33,7 @@ final class Router: NSObject, ObservableObject {
         case .stylistsFocusView:
             StylistsFocusView(store: Store(initialState: StylistsFocusStore.State(), reducer: { StylistsFocusStore() } ))
         case .styleCollectionView:
-            StyleCollectionView(store: Store(initialState: StyleCollectionStore.State(), reducer: { StyleCollectionStore() } ))
+            StyleCollectionView(store: Store(initialState: StyleCollectionStore.State(parentState: StylistsFocusStore.State()), reducer: { StyleCollectionStore() } ))
         case .colorsCollectionView:
             ColorsCollectionView(store: Store(initialState: ColorsCollectionStore.State(), reducer: { ColorsCollectionStore() } ))
         case .paywallView:

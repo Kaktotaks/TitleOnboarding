@@ -13,6 +13,7 @@ import ComposableArchitecture
 struct ColorsCollectionStore {
     @Dependency(\.apiClient) var apiClient
     
+    @ObservableState
     struct State: Equatable {
         var models: [ColorStyleModel] = []
         var pickedItems: Set<ColorStyleModel> = []
@@ -20,12 +21,13 @@ struct ColorsCollectionStore {
         var paywallPresented: Bool = false
     }
     
-    enum Action: Equatable {
+    enum Action: BindableAction {
         case toggleItem(ColorStyleModel)
         case togglePaywall
         case loadModels
         case modelsLoaded([ColorStyleModel])
         case navigateBack
+        case binding(BindingAction<State>)
     }
     
     var body: some Reducer<State, Action> {
@@ -56,6 +58,9 @@ struct ColorsCollectionStore {
                 return .none
                 
             case .navigateBack:
+                return .none
+                
+            case .binding(_):
                 return .none
             }
         }
@@ -115,11 +120,12 @@ struct ColorsCollectionView: View {
                         .padding([.leading, .trailing, .bottom])
                     }
                     .onAppear {
-                        viewStore.send(.loadModels)
+                        if viewStore.models.isEmpty {
+                            viewStore.send(.loadModels)
+                        }
                     }
                     .setupBackButton() {
-                        //                        viewStore.send(.navigateBack)
-                        router.navigateBack()
+                        viewStore.send(.navigateBack)
                     }
                     .navigationTitle("Style preferences")
                     .navigationBarTitleDisplayMode(.inline)

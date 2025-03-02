@@ -12,22 +12,26 @@ import ComposableArchitecture
 struct StyleCollectionStore {
     @Dependency(\.apiClient) var apiClient
     
+    @ObservableState
     struct State: Equatable {
         var models: [ColorStyleModel] = []
         var pickedItems: Set<ColorStyleModel> = []
         var isLoading: Bool = false
+        var parentState: StylistsFocusStore.State
     }
     
-    
-    enum Action: Equatable {
+    enum Action: BindableAction {
         case toggleItem(ColorStyleModel)
         case navigateToColorsCollection
         case loadModels
         case modelsLoaded([ColorStyleModel])
         case navigateBack
+        case binding(BindingAction<State>)
+        case parentAction(StylistsFocusStore.Action)
     }
     
     var body: some Reducer<State, Action> {
+        BindingReducer()
         Reduce { state, action in
             switch action {
             case .toggleItem(let model):
@@ -39,10 +43,10 @@ struct StyleCollectionStore {
                 return .none
                 
             case .navigateToColorsCollection:
-                return .none
+                return .none /*.send(.delegate(.navigateToColorsCollection)) // Notify parent store*/
                 
             case .navigateBack:
-                return .none
+                return .none/*send(.delegate(.navigateBack))*/
                 
             case .loadModels:
                 state.isLoading = true
@@ -55,13 +59,16 @@ struct StyleCollectionStore {
                 state.isLoading = false
                 state.models = models
                 return .none
+            case .binding(_):
+                return .none
+            case .parentAction(_):
+                return .none
             }
         }
     }
 }
 
 struct StyleCollectionView: View {
-    @EnvironmentObject var router: Router
     let store: StoreOf<StyleCollectionStore>
     
     var body: some View {
@@ -94,20 +101,17 @@ struct StyleCollectionView: View {
                 .scrollIndicators(.hidden)
                 
                 MainButton(style: .black , text: "Continue") {
-                    //                    viewStore.send(.navigateToColorsCollection)
-                    router.navigate(to: .colorsCollectionView)
-                    viewStore.pickedItems.forEach { item in
-                        print(item)
-                    }
+                    viewStore.send(.navigateToColorsCollection)
                 }
                 .padding([.leading, .trailing, .bottom])
             }
             .setupBackButton() {
-                //                viewStore.send(.navigateBack)
-                router.navigateBack()
+                viewStore.send(.navigateBack)
             }
             .onAppear {
-                viewStore.send(.loadModels)
+                if viewStore.models.isEmpty {
+                    viewStore.send(.loadModels)
+                }
             }
             .navigationTitle("Style preferences")
             .navigationBarTitleDisplayMode(.inline)
@@ -118,6 +122,6 @@ struct StyleCollectionView: View {
 
 struct Style_CollectionView: PreviewProvider {
     static var previews: some View {
-        StyleCollectionView(store: Store(initialState: StyleCollectionStore.State(), reducer: { StyleCollectionStore() } ))
+        StyleCollectionView(store: Store(initialState: StyleCollectionStore.State(parentState: StylistsFocusStore.State()), reducer: { StyleCollectionStore() } ))
     }
 }
