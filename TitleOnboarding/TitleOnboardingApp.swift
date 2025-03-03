@@ -18,6 +18,7 @@ struct TitleOnboardingApp: App {
     var body: some Scene {
         WindowGroup {
             WelcomeView(store: store)
+                .preferredColorScheme(.light)
         }
     }
 }
