@@ -65,7 +65,7 @@ struct TableCell: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                Text(model.mainTitle)
+                Text(model.title)
                     .customTextStyle(textStyle: .collectionItemTitle)
                 Text(model.subTitle)
                     .customTextStyle(textStyle: .secondary(size: 14))

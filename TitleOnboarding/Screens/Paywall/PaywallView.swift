@@ -67,6 +67,7 @@ struct PaywallView: View {
     @State private var selectedModel: PlanModel?
     @Binding var isPresented: Bool
     @State var store = Store(initialState: PaywallStore.State(), reducer: { PaywallStore() } )
+    var onContinue: () -> Void
     
     var body: some View {
         WithViewStore(self.store, observe: { $0 }) { viewStore in
@@ -94,7 +95,9 @@ struct PaywallView: View {
                             .customTextStyle(textStyle: .secondary(size: 14))
                             .padding()
                         
-                        BottomView(pickedPlan: $selectedModel)
+                        BottomView(pickedPlan: $selectedModel) {
+                            onContinue()
+                        }
                     }
                 }
             }
@@ -160,11 +163,13 @@ fileprivate struct PlansViewView: View {
 
 fileprivate struct BottomView: View {
     @Binding var pickedPlan: PlanModel?
+    var onContinue: () -> Void
     
     var body: some View {
         VStack(spacing: 4) {
             MainButton(style: .black) {
-                print(pickedPlan ?? "")
+//                print(pickedPlan ?? "")
+                onContinue()
             }
             .padding([.bottom, .leading, .trailing])
             

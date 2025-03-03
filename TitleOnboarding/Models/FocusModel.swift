@@ -8,7 +8,7 @@
 import Foundation
 
 struct FocusModel: Hashable, Identifiable {
-    let mainTitle: String
+    let title: String
     let subTitle: String
     let id: UUID = UUID()
 }

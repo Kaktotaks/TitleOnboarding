@@ -28,11 +28,11 @@ extension APIClient: DependencyKey {
         fetchFocusModels: {
             try? await Task.sleep(nanoseconds: 2_000_000_000)
             return [
-                FocusModel(mainTitle: "Reinvent wardrobe", subTitle: "to discover fresh outfit ideas"),
-                FocusModel(mainTitle: "Define color palette", subTitle: "to enhance my natural features"),
-                FocusModel(mainTitle: "Create a seasonal capsule", subTitle: "to curate effortless and elegant looks"),
-                FocusModel(mainTitle: "Define my style", subTitle: "to discover my signature look"),
-                FocusModel(mainTitle: "Create an outfit for an event", subTitle: "to own a spotlight wherever you go")
+                FocusModel(title: "Reinvent wardrobe", subTitle: "to discover fresh outfit ideas"),
+                FocusModel(title: "Define color palette", subTitle: "to enhance my natural features"),
+                FocusModel(title: "Create a seasonal capsule", subTitle: "to curate effortless and elegant looks"),
+                FocusModel(title: "Define my style", subTitle: "to discover my signature look"),
+                FocusModel(title: "Create an outfit for an event", subTitle: "to own a spotlight wherever you go")
             ]
         },
         fetchStylesModels: {

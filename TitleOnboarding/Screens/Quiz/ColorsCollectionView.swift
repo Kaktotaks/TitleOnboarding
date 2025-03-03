@@ -28,6 +28,7 @@ struct ColorsCollectionStore {
         case modelsLoaded([ColorStyleModel])
         case navigateBack
         case binding(BindingAction<State>)
+        case getFinalResult
     }
     
     var body: some Reducer<State, Action> {
@@ -62,6 +63,8 @@ struct ColorsCollectionStore {
                 
             case .binding(_):
                 return .none
+            case .getFinalResult:
+                return .none
             }
         }
     }
@@ -77,7 +80,9 @@ struct ColorsCollectionView: View {
                     PaywallView(isPresented: viewStore.binding(
                         get: \.paywallPresented,
                         send: ColorsCollectionStore.Action.togglePaywall
-                    ))
+                    )) {
+                        viewStore.send(.getFinalResult)
+                    }
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                     .zIndex(1)
                 } else {
