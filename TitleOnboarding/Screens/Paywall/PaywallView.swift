@@ -6,64 +6,106 @@
 //
 
 import SwiftUI
+import ComposableArchitecture
+
+@Reducer
+struct PaywallStore {
+    @ObservableState
+    struct State: Equatable {
+        var plans: [PlanModel] = [
+            .init(period: "TRY 3 DAYS", price: "FOR FREE", description: "then $29.99 billed monthly", isHot: true),
+            .init(period: "Quarterly", price: "$59.99", description: "billed quarterly"),
+            .init(period: "Lifetime", price: "$99.99", description: "one-time payment")
+        ]
+        var selectedPlan: PlanModel?
+        var isPresented: Bool = true
+    }
+    
+    enum Action: BindableAction {
+        case binding(BindingAction<State>)
+        case selectPlan(PlanModel)
+        case continueButtonTapped
+        case dismissPaywall
+        case termsOfUseTapped
+        case privacyPolicyTapped
+    }
+    
+    var body: some Reducer<State, Action> {
+            BindingReducer()
+            Reduce { state, action in
+                switch action {
+                case .selectPlan(let plan):
+                    state.selectedPlan = plan
+                    return .none
+                    
+                case .continueButtonTapped:
+                    if let selectedPlan = state.selectedPlan {
+                        print("Selected Plan: \(selectedPlan)")
+                    }
+                    return .none
+                    
+                case .dismissPaywall:
+                    state.isPresented = false
+                    return .none
+                    
+                case .termsOfUseTapped:
+                    print("Terms of Use tapped")
+                    return .none
+                    
+                case .privacyPolicyTapped:
+                    print("Privacy Policy tapped")
+                    return .none
+                    
+                case .binding(_):
+                    return .none
+                }
+            }
+        }
+}
 
 struct PaywallView: View {
     @State private var selectedModel: PlanModel?
     @Binding var isPresented: Bool
-    
-    let models: [PlanModel] = [
-        .init(period: "TRY 3 DAYS", price: "FOR FREE", description: "then $29.99 billed monthly", isHot: true),
-        .init(period: "Quarterly", price: "$59.99", description: "billed quarterly"),
-        .init(period: "Lifetime", price: "$99.99", description: "one-time payment")
-    ]
-    
-    init(isPresented: Binding<Bool>) {
-        _selectedModel = State(initialValue: models.first { $0.isHot })
-        _isPresented = isPresented
-    }
+    @State var store = Store(initialState: PaywallStore.State(), reducer: { PaywallStore() } )
     
     var body: some View {
-        ScrollView(.vertical) {
-            VStack() {
-                VStack {
-                    Image(.paywallBackgroundShort)
-                        .resizable()
-                        .scaledToFit()
-                        .edgesIgnoringSafeArea(.all)
+        WithViewStore(self.store, observe: { $0 }) { viewStore in
+            ScrollView(.vertical) {
+                VStack() {
+                    VStack {
+                        Image(.paywallBackgroundShort)
+                            .resizable()
+                            .scaledToFit()
+                            .edgesIgnoringSafeArea(.all)
+                        
+                        Spacer()
+                    }
                     
-                    Spacer()
-                }
-                
-                VStack {
-                    Spacer()
-                    MainInfoView()
-                        .padding()
-                    
-                    PlansViewView(selectedModel: $selectedModel, models: models)
-                        .padding()
-                        .frame(height: 170)
-                    
-                    Text("Auto-renewable. Cancel anytime.")
-                        .customTextStyle(textStyle: .secondary(size: 14))
-                        .padding()
-                    
-                    BottomView(pickedPlan: $selectedModel)
+                    VStack {
+                        Spacer()
+                        MainInfoView()
+                            .padding()
+                        
+                        PlansViewView(selectedModel: $selectedModel, models: store.plans)
+                            .padding()
+                            .frame(height: 170)
+                        
+                        Text("Auto-renewable. Cancel anytime.")
+                            .customTextStyle(textStyle: .secondary(size: 14))
+                            .padding()
+                        
+                        BottomView(pickedPlan: $selectedModel)
+                    }
                 }
             }
-        }
-        .setupBackButton() {
-            withAnimation(.bouncy) {
-                isPresented = false
+            .setupBackButton() {
+                withAnimation(.bouncy) {
+                    isPresented = false
+                }
             }
+            .edgesIgnoringSafeArea(.all)
+            .scrollIndicators(.hidden)
         }
-        .edgesIgnoringSafeArea(.all)
-        .scrollIndicators(.hidden)
-    }
-}
-
-struct PaywallView_Previews: PreviewProvider {
-    static var previews: some View {
-        PaywallView(isPresented: .constant(true))
     }
 }
 
@@ -121,7 +163,7 @@ fileprivate struct BottomView: View {
     
     var body: some View {
         VStack(spacing: 4) {
-            MainButton(style: .black , text: "Continue") {
+            MainButton(style: .black) {
                 print(pickedPlan ?? "")
             }
             .padding([.bottom, .leading, .trailing])

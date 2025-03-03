@@ -9,46 +9,55 @@ import SwiftUI
 import ComposableArchitecture
 
 struct WelcomeView: View {
-    @EnvironmentObject var router: Router
-    let store: StoreOf<WelcomeDomain>
+    @State var store: StoreOf<RootStore>
     
     var body: some View {
-        WithViewStore(self.store, observe: { $0 }) { viewStore in
-            VStack {
+        NavigationStack(
+            path: $store.scope(state: \.path, action: \.path)
+        ) {
+            WithViewStore(self.store, observe: { $0 }) { viewStore in
                 VStack {
-                    Spacer()
-                    
-                    HStack() {
-                        Text("""
-                             Online Personal
-                             Styling.
-                             Outfits for
-                             Every Woman.
-                             """)
-                        .customTextStyle(textStyle: .welcomeTitle)
+                    VStack {
                         Spacer()
+                        
+                        HStack() {
+                            Text(viewStore.welcomeViewTitle)
+                                .customTextStyle(textStyle: .welcomeTitle)
+                            Spacer()
+                        }
+                        
+                        MainButton(style: .white) {
+                            viewStore.send(.showOnboardingView)
+                        }
+                        .padding([.bottom])
                     }
-                    
-                    MainButton(style: .white, text: "CONTINUE") {
-                        router.navigate(to: .onboardingView)
-                    }
-                    .padding([.bottom])
+                    .padding(.horizontal, 20)
                 }
-                .padding(.horizontal, 20)
+                .background(
+                    Image(.welcome)
+                        .resizable()
+                        .scaledToFill()
+                        .edgesIgnoringSafeArea(.all)
+                        .bottomFade(height: 600, startColor: .black)
+                )
             }
-            .background(
-                Image(.welcome)
-                    .resizable()
-                    .scaledToFill()
-                    .edgesIgnoringSafeArea(.all)
-                    .bottomFade(height: 600, startColor: .black)
-            )
+        } destination: { state in
+            switch state.case {
+            case .colorsCollectionView(let store):
+                ColorsCollectionView(store: store)
+            case .styleCollectionView(let store):
+                StyleCollectionView(store: store)
+            case .onboardingView(let store):
+                OnboardingView(store: store)
+            case .stylistsFocusView(let store):
+                StylistsFocusView(store: store)
+            }
         }
     }
 }
 
 struct WelcomeView_Previews: PreviewProvider {
     static var previews: some View {
-        WelcomeView(store: Store(initialState: WelcomeDomain.State(), reducer: { WelcomeDomain() } ))
+        WelcomeView(store: Store(initialState: RootStore.State(), reducer: { RootStore() } ))
     }
 }

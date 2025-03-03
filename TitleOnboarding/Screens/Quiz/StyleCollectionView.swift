@@ -17,7 +17,6 @@ struct StyleCollectionStore {
         var models: [ColorStyleModel] = []
         var pickedItems: Set<ColorStyleModel> = []
         var isLoading: Bool = false
-        var parentState: StylistsFocusStore.State
     }
     
     enum Action: BindableAction {
@@ -27,7 +26,6 @@ struct StyleCollectionStore {
         case modelsLoaded([ColorStyleModel])
         case navigateBack
         case binding(BindingAction<State>)
-        case parentAction(StylistsFocusStore.Action)
     }
     
     var body: some Reducer<State, Action> {
@@ -43,10 +41,10 @@ struct StyleCollectionStore {
                 return .none
                 
             case .navigateToColorsCollection:
-                return .none /*.send(.delegate(.navigateToColorsCollection)) // Notify parent store*/
+                return .none
                 
             case .navigateBack:
-                return .none/*send(.delegate(.navigateBack))*/
+                return .none
                 
             case .loadModels:
                 state.isLoading = true
@@ -60,8 +58,6 @@ struct StyleCollectionStore {
                 state.models = models
                 return .none
             case .binding(_):
-                return .none
-            case .parentAction(_):
                 return .none
             }
         }
@@ -100,7 +96,7 @@ struct StyleCollectionView: View {
                 .bottomFade()
                 .scrollIndicators(.hidden)
                 
-                MainButton(style: .black , text: "Continue") {
+                MainButton(style: .black) {
                     viewStore.send(.navigateToColorsCollection)
                 }
                 .padding([.leading, .trailing, .bottom])
@@ -122,6 +118,6 @@ struct StyleCollectionView: View {
 
 struct Style_CollectionView: PreviewProvider {
     static var previews: some View {
-        StyleCollectionView(store: Store(initialState: StyleCollectionStore.State(parentState: StylistsFocusStore.State()), reducer: { StyleCollectionStore() } ))
+        StyleCollectionView(store: Store(initialState: StyleCollectionStore.State(), reducer: { StyleCollectionStore() } ))
     }
 }

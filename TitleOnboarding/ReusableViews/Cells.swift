@@ -92,6 +92,5 @@ struct TableCell: View {
 struct Collection_Cell: PreviewProvider {
     static var previews: some View {
         CollectionCell(type: .color, model: .init(imageName: "LightBlueColor", title: "Test title"), isPicked: .constant(true))
-//        TableCell(model: .init(mainTitle: "Main test title", subTitle: "Main test subTitle"), isPicked: .constant(true))
     }
 }

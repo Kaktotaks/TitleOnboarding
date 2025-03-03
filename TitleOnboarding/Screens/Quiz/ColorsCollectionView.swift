@@ -68,7 +68,6 @@ struct ColorsCollectionStore {
 }
 
 struct ColorsCollectionView: View {
-    @EnvironmentObject var router: Router
     let store: StoreOf<ColorsCollectionStore>
     
     var body: some View {
@@ -109,7 +108,7 @@ struct ColorsCollectionView: View {
                         .bottomFade()
                         .scrollIndicators(.hidden)
                         
-                        MainButton(style: .black , text: "Continue") {
+                        MainButton(style: .black) {
                             withAnimation(.bouncy) {
                                 viewStore.send(.togglePaywall)
                             }

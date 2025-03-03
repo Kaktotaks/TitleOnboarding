@@ -10,23 +10,14 @@ import ComposableArchitecture
 
 @main
 struct TitleOnboardingApp: App {
-//    @StateObject var router = Router()
-    
     let store = Store(
-        initialState: StylistsFocusStore.State(),
-        reducer: { StylistsFocusStore()}
+        initialState: RootStore.State(),
+        reducer: { RootStore()}
     )
     
     var body: some Scene {
         WindowGroup {
-            StylistsFocusView(store: store)
-//            NavigationStack(path: $router.navPath) {
-//                WelcomeView(store: store)
-//                    .navigationDestination(for: Router.Destination.self) { destination in
-//                    router.view(for: destination)
-//                }
-//            }
-//            .environmentObject(router)
+            WelcomeView(store: store)
         }
     }
 }

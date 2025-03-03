@@ -13,7 +13,7 @@ enum ButtonStyles {
 
 struct MainButton: View {
     let style: ButtonStyles
-    let text: String
+    var text: String = "CONTINUE"
     let action: () -> Void
     @State var isPressed: Bool = false
     
@@ -56,8 +56,7 @@ struct CheckmarkButton: View {
 
 struct Checkmark_Button2: PreviewProvider {
     static var previews: some View {
-        //        CheckmarkButton(isPicked: .constant(true))
-        MainButton(style: .black, text: "Continue") {
+        MainButton(style: .black) {
             print(">>> tapped")
         }
     }
