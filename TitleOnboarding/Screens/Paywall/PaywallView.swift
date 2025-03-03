@@ -18,86 +18,97 @@ struct PaywallStore {
             .init(period: "Lifetime", price: "$99.99", description: "one-time payment")
         ]
         var selectedPlan: PlanModel?
-        var isPresented: Bool = true
+        
+        init() { self.selectedPlan = plans.first }
     }
     
     enum Action: BindableAction {
         case binding(BindingAction<State>)
-        case selectPlan(PlanModel)
+        case selectPlan(PlanModel?)
         case continueButtonTapped
-        case dismissPaywall
         case termsOfUseTapped
         case privacyPolicyTapped
     }
     
     var body: some Reducer<State, Action> {
-            BindingReducer()
-            Reduce { state, action in
-                switch action {
-                case .selectPlan(let plan):
-                    state.selectedPlan = plan
-                    return .none
-                    
-                case .continueButtonTapped:
-                    if let selectedPlan = state.selectedPlan {
-                        print("Selected Plan: \(selectedPlan)")
-                    }
-                    return .none
-                    
-                case .dismissPaywall:
-                    state.isPresented = false
-                    return .none
-                    
-                case .termsOfUseTapped:
-                    print("Terms of Use tapped")
-                    return .none
-                    
-                case .privacyPolicyTapped:
-                    print("Privacy Policy tapped")
-                    return .none
-                    
-                case .binding(_):
-                    return .none
+        BindingReducer()
+        Reduce { state, action in
+            switch action {
+            case .selectPlan(let plan):
+                state.selectedPlan = plan
+                return .none
+                
+            case .continueButtonTapped:
+                if let selectedPlan = state.selectedPlan {
+                    print("Selected Plan: \(selectedPlan)")
                 }
+                return .none
+                
+            case .termsOfUseTapped:
+                print("Terms of Use tapped")
+                return .none
+                
+            case .privacyPolicyTapped:
+                print("Privacy Policy tapped")
+                return .none
+                
+            case .binding(_):
+                return .none
             }
         }
+    }
 }
 
 struct PaywallView: View {
     @State private var selectedModel: PlanModel?
     @Binding var isPresented: Bool
-    @State var store = Store(initialState: PaywallStore.State(), reducer: { PaywallStore() } )
+    let store = Store(initialState: PaywallStore.State(), reducer: { PaywallStore() } )
     var onContinue: () -> Void
     
     var body: some View {
         WithViewStore(self.store, observe: { $0 }) { viewStore in
             ScrollView(.vertical) {
-                VStack() {
-                    VStack {
-                        Image(.paywallBackgroundShort)
-                            .resizable()
-                            .scaledToFit()
-                            .edgesIgnoringSafeArea(.all)
-                        
-                        Spacer()
-                    }
+                VStack {
+                    Image(.paywallBackgroundShort)
+                        .resizable()
+                        .scaledToFit()
+                        .edgesIgnoringSafeArea(.all)
                     
                     VStack {
                         Spacer()
                         MainInfoView()
                             .padding()
                         
-                        PlansViewView(selectedModel: $selectedModel, models: store.plans)
-                            .padding()
-                            .frame(height: 170)
+                        PlansViewView(
+                            selectedModel: Binding(
+                                get: { viewStore.selectedPlan },
+                                set: { viewStore.send(.selectPlan($0)) }
+                            ),
+                            models: viewStore.plans
+                        )
+                        .padding()
+                        .frame(height: 170)
                         
                         Text("Auto-renewable. Cancel anytime.")
                             .customTextStyle(textStyle: .secondary(size: 14))
                             .padding()
                         
-                        BottomView(pickedPlan: $selectedModel) {
-                            onContinue()
-                        }
+                        BottomView(
+                            pickedPlan: Binding(
+                                get: { viewStore.selectedPlan },
+                                set: { viewStore.send(.selectPlan($0)) }
+                            ),
+                            onContinue: {
+                                viewStore.send(.continueButtonTapped)
+                                onContinue()
+                            },
+                            onTermsOfUseTapped: {
+                                viewStore.send(.termsOfUseTapped)
+                            },
+                            onPrivacyPolicyTapped: {
+                                viewStore.send(.privacyPolicyTapped)
+                            }
+                        )
                     }
                 }
             }
@@ -140,11 +151,10 @@ fileprivate struct PlansViewView: View {
             HStack(alignment: .bottom, spacing: 16) {
                 ForEach(models) { model in
                     PlanCell(
-                        isSelected: Binding(get: {
-                            selectedModel == model
-                        }, set: { _ in
-                            selectedModel = model
-                        }),
+                        isSelected: Binding(
+                            get: { selectedModel == model },
+                            set: { _ in selectedModel = model }
+                        ),
                         period: model.period,
                         price: model.price,
                         description: model.description,
@@ -164,11 +174,12 @@ fileprivate struct PlansViewView: View {
 fileprivate struct BottomView: View {
     @Binding var pickedPlan: PlanModel?
     var onContinue: () -> Void
+    var onTermsOfUseTapped: () -> Void
+    var onPrivacyPolicyTapped: () -> Void
     
     var body: some View {
         VStack(spacing: 4) {
             MainButton(style: .black) {
-//                print(pickedPlan ?? "")
                 onContinue()
             }
             .padding([.bottom, .leading, .trailing])
@@ -176,7 +187,7 @@ fileprivate struct BottomView: View {
             HStack(spacing: 8) {
                 Text("Terms of Use")
                     .onTapGesture {
-                        print("Terms of use tapped")
+                        onTermsOfUseTapped()
                     }
                     .customTextStyle(textStyle: .secondary(size: 14))
                     .underline()
@@ -186,7 +197,7 @@ fileprivate struct BottomView: View {
                 
                 Text("Privacy Policy")
                     .onTapGesture {
-                        print("Privacy Policy tapped")
+                        onPrivacyPolicyTapped()
                     }
                     .customTextStyle(textStyle: .secondary(size: 14))
                     .underline()
